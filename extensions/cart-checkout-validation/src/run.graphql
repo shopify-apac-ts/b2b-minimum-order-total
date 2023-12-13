@@ -1,0 +1,19 @@
+query RunInput {
+  cart {
+    buyerIdentity {
+      purchasingCompany {
+        location {
+          metafield(namespace: "custom", key: "minimum_order_amount") {
+            value
+          }
+        }
+      }
+    }
+    cost {
+      subtotalAmount {
+        amount
+        currencyCode
+      }
+    }
+  }
+}
