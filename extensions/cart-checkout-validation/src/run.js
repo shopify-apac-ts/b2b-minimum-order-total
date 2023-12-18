@@ -10,17 +10,13 @@
 * @returns {FunctionRunResult}
 */
 export function run(input) {
-  // The error
-  const errorMinimumOrderAmount = {
-    localizedMessage:
-        "There is an order minimum of location.custom.minimum_order_amount for B2B customers",
-    target: "cart"
-  };
-  const errorCurrencyCode = {
-    localizedMessage:
-        "B2B customer can only place an order in USD",
-    target: "cart"
-  };
+
+  // Do not validate in the cart so we can reduce / remove cart items
+  console.error("buyerJourney.step", input.buyerJourney.step);
+  if(input.buyerJourney.step === "CART_INTERACTION") {
+    console.error("NO VALIDATION in cart");
+    return { errors: [] };
+  }
 
   // Check if minimum order amount is set
   const minimumOrderAmountStr = input.cart.buyerIdentity?.purchasingCompany?.location?.metafield?.value;
@@ -29,21 +25,27 @@ export function run(input) {
     return { errors: [] };
   }
 
+  // Currency code
+  const currencyCode = input.cart.cost.subtotalAmount.currencyCode;
+  console.error("currencyCode", currencyCode);
+
+  // The error
+  const errorMinimumOrderAmount = {
+    localizedMessage:
+        `The order amount MUST be ${minimumOrderAmountStr} ${currencyCode} or greater for this B2B customer`,
+    target: "cart"
+  };
+
   // Parse the decimal (serialized as a string) into a float.
   const orderSubtotal = parseFloat(input.cart.cost.subtotalAmount.amount);
   const minimumOrderAmount = parseFloat(minimumOrderAmountStr);
-  const currencyCode = input.cart.cost.subtotalAmount.currencyCode;
   const errors = [];
   console.error("orderSubtotal", orderSubtotal);
   console.error("minimumOrderAmount", minimumOrderAmount);
-  console.error("currencyCode", currencyCode);
 
   // Orders with subtotals greater than $1,000 are available only to established customers.
   if (orderSubtotal < minimumOrderAmount) {
     errors.push(errorMinimumOrderAmount);
-  }
-  if (currencyCode !== "USD") {
-    errors.push(errorCurrencyCode);
   }
 
   return { errors };
