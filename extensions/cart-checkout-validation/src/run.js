@@ -39,11 +39,11 @@ export function run(input) {
   // Parse the decimal (serialized as a string) into a float.
   const orderSubtotal = parseFloat(input.cart.cost.subtotalAmount.amount);
   const minimumOrderAmount = parseFloat(minimumOrderAmountStr);
-  const errors = [];
   console.error("orderSubtotal", orderSubtotal);
   console.error("minimumOrderAmount", minimumOrderAmount);
 
   // Orders with subtotals greater than $1,000 are available only to established customers.
+  const errors = [];
   if (orderSubtotal < minimumOrderAmount) {
     errors.push(errorMinimumOrderAmount);
   }
